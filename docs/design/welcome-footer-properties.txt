@@ -1,0 +1,146 @@
+
+  - button "Multiplayer tools":
+  - group "Prototype view":
+    - button "Present":
+    - button "Prototype view":
+  - button "Share"
+  - status
+  - tablist:
+    - tab "Comments":
+      - generic: Comments
+      - generic: Comments
+    - tab "Properties" [selected]:
+      - generic: Properties
+      - generic: Properties
+  - button "100%, zoom and view options":
+    - text: 100%
+  - generic: Get coding, faster
+  - button "Close":
+  - img "Mock box model and css code snippet"
+  - text: Dev Mode simplifies handoff, speeds up inspection, and integrates with tools like VS Code and Storybook.
+  - button "Request access":
+    - generic: Request access
+  - img "Text":
+  - generic: Text
+  - button "Нажимая кнопку «Регистрация» или «У вас уже есть аккаунт», Вы подтверждаете, что ознакомились с Политикой конфиденциальности, и даёте согласие на обработку Ваших Персональных данных в соответствии с ней."
+  - heading "Layout" [level=3]
+  - button "Copy":
+  - 'button "Copy Width: 345px"':
+    - generic "Width"
+    - generic "345px"
+  - 'button "Copy Height: 44px"':
+    - generic "Height"
+    - generic "44px"
+  - 'button "Copy Opacity: 35%"':
+    - generic "Opacity"
+    - generic "35%"
+  - heading "Content" [level=3]
+  - button "Copy":
+  - button "Нажимая кнопку «Регистрация» или «У вас уже есть аккаунт», Вы подтверждаете, что ознакомились с Политикой конфиденциальности, и даёте согласие на обработку Ваших Персональных данных в соответствии с ней.":
+    - generic: Нажимая кнопку «Регистрация» или «У вас уже есть аккаунт», Вы подтверждаете, что ознакомились с Политикой конфиденциальности, и даёте согласие на обработку Ваших Персональных данных в соответствии с ней.
+  - heading "Typography" [level=3]
+  - button "Copy":
+  - 'button "Copy Font: Noto Sans"':
+    - generic "Font"
+    - generic "Noto Sans"
+  - 'button "Copy Weight: 400"':
+    - generic "Weight"
+    - generic "400"
+  - 'button "Copy Style: Regular"':
+    - generic "Style"
+    - generic "Regular"
+  - 'button "Copy Size: 10px"':
+    - generic "Size"
+    - generic "10px"
+  - 'button "Copy Line height: 114.99999999999999%"':
+    - generic "Line height"
+    - generic "114.99999999999999%"
+  - 'button "Copy Letter spacing: 0%"':
+    - generic "Letter spacing"
+    - generic "0%"
+  - 'button "Copy Horizontal alignment: Center"':
+    - generic "Horizontal alignment"
+    - generic "Center"
+  - 'button "Copy Vertical alignment: Middle"':
+    - generic "Vertical alignment"
+    - generic "Middle"
+  - heading "Span (Политикой конфиденциальности)" [level=3]
+  - button "Copy":
+  - 'button "Copy Font: Noto Sans"':
+    - generic "Font"
+    - generic "Noto Sans"
+  - 'button "Copy Weight: 400"':
+    - generic "Weight"
+    - generic "400"
+  - 'button "Copy Style: Regular"':
+    - generic "Style"
+    - generic "Regular"
+  - 'button "Copy Size: 10px"':
+    - generic "Size"
+    - generic "10px"
+  - 'button "Copy Line height: 114.99999999999999%"':
+    - generic "Line height"
+    - generic "114.99999999999999%"
+  - 'button "Copy Letter spacing: 0%"':
+    - generic "Letter spacing"
+    - generic "0%"
+  - 'button "Copy Horizontal alignment: Center"':
+    - generic "Horizontal alignment"
+    - generic "Center"
+  - 'button "Copy Vertical alignment: Middle"':
+    - generic "Vertical alignment"
+    - generic "Middle"
+  - generic: Text decoration
+  - 'button "Copy Text decoration—Decoration: Underline"':
+    - generic "Decoration"
+    - generic "Underline"
+  - 'button "Copy Text decoration—Style: Solid"':
+    - generic "Style"
+    - generic "Solid"
+  - 'button "Copy Text decoration—Offset: 0%"':
+    - generic "Offset"
+    - generic "0%"
+  - 'button "Copy Text decoration—Thickness: 0%"':
+    - generic "Thickness"
+    - generic "0%"
+  - heading "Colors" [level=3]
+  - generic: Color format
+  - combobox "Color format":
+    - generic: Hex
+  - button "Copy":
+  - button "Grey/Grey 800 Grey/Grey 800":
+    - img "Grey/Grey 800":
+    - button "Grey/Grey 800":
+      - generic "Grey/Grey 800"
+  - button "#39434F":
+    - generic: "#39434F"
+  - button "Export":
+    - generic: Export
+  - button "Add export settings":
+  - slider "Resize handle"
+- region "Application toolbar":
+  - toolbar "Editor":
+    - text: Ask to edit Request sent
+    - button "Move" [pressed]:
+    - button "Hand tool":
+    - button "Comment":
+    - button "Ask to edit":
+      - generic: Ask to edit
+    - text: Request sent
+    - text: Ask to edit Request sent
+    - radiogroup "Toolbelt Mode":
+      - generic: Toolbelt Mode
+      - radio "Draw"
+      - generic: Draw
+      - radio "Design" [checked]
+      - generic: Design
+      - radio "Motion"
+      - generic: Motion
+      - radio "Dev Mode"
+      - generic: Dev Mode
+- region "Help/zoom toolbar":
+  - toolbar "Help/zoom toolbar":
+    - button "Help":
+- status
+- alert
+- alert

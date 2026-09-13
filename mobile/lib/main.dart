@@ -16,8 +16,11 @@ import 'package:app_links/app_links.dart';
 import 'core/api.dart';
 import 'core/platform_services.dart';
 part 'core/widgets.dart';
+part 'core/design.dart';
 part 'features/auth/auth.dart';
+part 'features/auth/welcome.dart';
 part 'features/profiles/profiles.dart';
+part 'features/profiles/owner.dart';
 part 'features/feed/feed.dart';
 part 'features/stories/stories.dart';
 part 'features/relationships/relationships.dart';
@@ -32,11 +35,14 @@ Api api = Api();
 final platform = PlatformServices();
 final nav = GlobalKey<NavigatorState>();
 final messenger = GlobalKey<ScaffoldMessengerState>();
-const brown = Color(0xff583a2b),
-    orange = Color(0xffbe541a),
-    yellow = Color(0xffffedb7),
-    paper = Color(0xfffffdf9),
-    muted = Color(0xff746b62);
+const brown = Color(0xff996440),
+    orange = Color(0xffffb85c),
+    yellow = Color(0xfffbeb90),
+    paper = Color(0xfff6f6f6),
+    ink = Color(0xff39434f),
+    muted = Color(0xff6c7787),
+    iconGrey = Color(0xffb3c0d2),
+    divider = Color(0xffe6ebf1);
 String? pendingRoute;
 
 void main() {
@@ -177,56 +183,7 @@ class _ZuzuAppState extends State<ZuzuApp> with WidgetsBindingObserver {
     locale: const Locale('ru'),
     supportedLocales: const [Locale('ru')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    theme: ThemeData(
-      useMaterial3: true,
-      scaffoldBackgroundColor: paper,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: orange,
-        primary: orange,
-        secondary: brown,
-        surface: paper,
-      ),
-      textTheme: ThemeData.light().textTheme.apply(
-        bodyColor: brown,
-        displayColor: brown,
-      ),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: yellow,
-        foregroundColor: brown,
-        centerTitle: false,
-        elevation: 0,
-      ),
-      cardTheme: CardThemeData(
-        color: Colors.white,
-        elevation: 0,
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: Color(0xffeee8dd)),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xffddd5ca)),
-        ),
-        contentPadding: const EdgeInsets.all(18),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(48, 52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-        ),
-      ),
-      navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: Colors.white,
-        indicatorColor: yellow,
-      ),
-    ),
+    theme: zuzuTheme(),
     home: loading
         ? const Scaffold(body: Center(child: CircularProgressIndicator()))
         : error != null
@@ -250,79 +207,87 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final scaffold = GlobalKey<ScaffoldState>();
   int tab = 0;
+  int revision = 0;
+  Future<void> create() async {
+    await open(const ItemEditor(kind: 'posts'));
+    if (mounted) setState(() => revision++);
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
+    key: scaffold,
+    drawer: Drawer(
+      width: MediaQuery.sizeOf(context).width * 308 / 375,
+      backgroundColor: yellow,
+      shape: const RoundedRectangleBorder(),
+      child: const MenuPane(),
+    ),
+    drawerEnableOpenDragGesture: false,
+    backgroundColor: tab == 1 || tab == 2 ? Colors.white : paper,
     appBar: AppBar(
-      title: const Text(
-        Ru.text94,
-        style: TextStyle(
-          fontWeight: FontWeight.w900,
-          fontSize: 30,
-          letterSpacing: -1,
-        ),
-      ),
+      toolbarHeight: tab == 0 ? 54 : 46,
+      title: tab == 2 || tab == 3
+          ? Text(
+              tab == 2 ? 'Чаты' : 'Карта',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+            )
+          : const BrandWordmark(),
+      leading: tab == 2 || tab == 3
+          ? null
+          : tab == 1
+          ? IconButton(
+              tooltip: 'Создать публикацию',
+              onPressed: create,
+              icon: const DesignIcon('plus', color: ink),
+            )
+          : IconButton(
+              tooltip: 'Мой питомец',
+              onPressed: () => open(
+                PageFrame(
+                  title: Ru.text94,
+                  child: ProfilePane(account: api.me!['id']),
+                ),
+              ),
+              icon: Padding(
+                padding: const EdgeInsets.all(5),
+                child: Image.asset(
+                  'assets/brand/welcome-logo.png',
+                  width: 28,
+                  height: 28,
+                ),
+              ),
+            ),
       actions: [
-        IconButton(
-          tooltip: Ru.text337,
-          onPressed: () => open(const SearchPage()),
-          icon: const Icon(Icons.search),
-        ),
-        IconButton(
-          tooltip: Ru.text103,
-          onPressed: () => open(const NotificationsPage()),
-          icon: const Icon(Icons.notifications_none),
-        ),
+        if (tab == 1)
+          IconButton(
+            tooltip: Ru.text103,
+            onPressed: () => open(const NotificationsPage()),
+            icon: const DesignIcon('bell', color: ink),
+          ),
       ],
     ),
     body: SafeArea(
-      child: Column(
-        children: [
-          if (api.health['demo'] == true)
-            Container(
-              width: double.infinity,
-              color: yellow.withValues(alpha: .45),
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: const Text(
-                Ru.text336,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 10, letterSpacing: 1.6),
-              ),
-            ),
-          Expanded(
-            child: switch (tab) {
-              0 => ProfilePane(account: api.me!['id']),
-              1 => const FeedPane(),
-              2 => const ChatsPane(),
-              3 => const MapPane(),
-              _ => const MenuPane(),
-            },
-          ),
-        ],
-      ),
+      top: false,
+      bottom: false,
+      child: switch (tab) {
+        0 => const OwnerPane(),
+        1 => FeedPane(key: ValueKey(revision)),
+        2 => const ChatsPane(),
+        3 => const MapPane(),
+        _ => const MenuPane(),
+      },
     ),
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: tab,
-      onDestinationSelected: (v) => setState(() => tab = v),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.pets_outlined),
-          label: Ru.text228,
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          label: Ru.text335,
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.chat_bubble_outline),
-          label: Ru.text334,
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.map_outlined),
-          label: Ru.text333,
-        ),
-        NavigationDestination(icon: Icon(Icons.menu), label: Ru.text332),
-      ],
+    bottomNavigationBar: ZuzuNavigationBar(
+      selected: tab,
+      onSelected: (value) {
+        if (value == 4) {
+          scaffold.currentState!.openDrawer();
+        } else {
+          setState(() => tab = value);
+        }
+      },
     ),
   );
 }

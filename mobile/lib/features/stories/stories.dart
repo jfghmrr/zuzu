@@ -8,88 +8,91 @@ class StoryStrip extends StatefulWidget {
 
 class _StoryStripState extends State<StoryStrip> {
   late Future<dynamic> future;
+  void load() => future = api.call('GET', '/items/stories?limit=50');
   @override
   void initState() {
     super.initState();
-    future = api.call('GET', '/items/stories?limit=50');
+    load();
   }
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
     future: future,
     builder: (c, s) => SizedBox(
-      height: 116,
+      height: 92,
       child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         scrollDirection: Axis.horizontal,
         children: [
-          SizedBox(
-            width: 90,
-            child: Column(
-              children: [
-                IconButton.filledTonal(
-                  tooltip: Ru.text182,
-                  iconSize: 32,
-                  padding: const EdgeInsets.all(18),
-                  onPressed: () async {
-                    await open(const ItemEditor(kind: 'stories'));
-                    if (mounted) {
-                      setState(
-                        () =>
-                            future = api.call('GET', '/items/stories?limit=50'),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.add),
+          Padding(
+            padding: const EdgeInsets.only(right: 14),
+            child: Semantics(
+              label: 'Добавить историю',
+              button: true,
+              child: InkWell(
+                onTap: () async {
+                  await open(const ItemEditor(kind: 'stories'));
+                  if (mounted) setState(load);
+                },
+                child: SizedBox(
+                  width: 86,
+                  height: 92,
+                  child: Stack(
+                    children: [
+                      PairedAvatar(
+                        pet: api.me?['pet']?['photo'],
+                        owner: api.me?['owner']?['photo'],
+                        size: 80,
+                        ownerSize: 30,
+                      ),
+                      Positioned(
+                        left: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: yellow,
+                          ),
+                          child: const DesignIcon(
+                            'plus',
+                            size: 18,
+                            color: brown,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Text(Ru.text181, style: TextStyle(fontSize: 11)),
-              ],
+              ),
             ),
           ),
           if (s.hasError)
             IconButton(
-              tooltip: Ru.text180,
-              onPressed: () => setState(
-                () => future = api.call('GET', '/items/stories?limit=50'),
-              ),
+              tooltip: 'Повторить загрузку историй',
+              onPressed: () => setState(load),
               icon: const Icon(Icons.refresh),
             ),
           if (s.hasData)
             for (final i in s.data['items'])
-              SizedBox(
-                width: 86,
-                child: InkWell(
-                  onTap: () => guarded(() async {
-                    await api.call('POST', '/stories/${i['id']}/view');
-                    await open(ItemPage(item: Map<String, dynamic>.from(i)));
-                    if (mounted) {
-                      setState(
-                        () =>
-                            future = api.call('GET', '/items/stories?limit=50'),
-                      );
-                    }
-                  }),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: orange, width: 2),
-                        ),
-                        child: Avatar(
-                          (i['data']['media'] as List).first,
-                          size: 58,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        i['author'],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
+              Padding(
+                padding: const EdgeInsets.only(right: 14),
+                child: Semantics(
+                  label: 'История: ${i['author']}',
+                  button: true,
+                  child: InkWell(
+                    onTap: () => guarded(() async {
+                      await api.call('POST', '/stories/${i['id']}/view');
+                      await open(ItemPage(item: Map<String, dynamic>.from(i)));
+                      if (mounted) setState(load);
+                    }),
+                    child: PairedAvatar(
+                      pet: i['avatar'],
+                      owner: i['owner_avatar'],
+                      size: 80,
+                      ownerSize: 30,
+                    ),
                   ),
                 ),
               ),

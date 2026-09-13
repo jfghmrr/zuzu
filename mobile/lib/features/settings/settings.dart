@@ -3,43 +3,182 @@ part of '../../main.dart';
 class MenuPane extends StatelessWidget {
   const MenuPane({super.key});
   @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.all(20),
-    children: [
-      const Text(
-        Ru.text137,
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          height: 1.2,
+  Widget build(BuildContext context) => SafeArea(
+    bottom: false,
+    child: ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Image.asset('assets/brand/wordmark.png', width: 80, height: 34),
+            IconButton(
+              tooltip: 'Закрыть меню',
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.chevron_left, color: ink),
+            ),
+          ],
         ),
-      ),
-      const SizedBox(height: 22),
-      entry(Icons.folder_outlined, Ru.text136, const VetPage()),
-      entry(Icons.calendar_month_outlined, Ru.text135, const RemindersPage()),
-      entry(Icons.people_outline, Ru.text134, const RelationshipsPage()),
-      entry(
-        Icons.favorite_outline,
-        Ru.text32,
-        const ItemEditor(kind: 'feedback'),
-      ),
-      entry(Icons.help_outline, Ru.text114, const FaqPage()),
-      entry(Icons.settings_outlined, Ru.text104, const SettingsPage()),
-      const SizedBox(height: 20),
-      const Text(
-        Ru.text133,
-        textAlign: TextAlign.center,
-        style: TextStyle(color: muted, height: 1.6, fontSize: 12),
-      ),
-    ],
+        const SizedBox(height: 32),
+        entry(context, 'envelope', 'Обратная связь', const FeedbackPage()),
+        const Divider(color: Color(0xffe8d981)),
+        entry(context, 'help', 'Часто задаваемые вопросы', const FaqPage()),
+        const Divider(color: Color(0xffe8d981)),
+        entry(context, 'settings', 'Настройки', const SettingsPage()),
+      ],
+    ),
   );
-  Widget entry(IconData icon, String title, Widget page) => Card(
-    child: ListTile(
-      contentPadding: const EdgeInsets.all(18),
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () => open(page),
+  Widget entry(BuildContext context, String icon, String title, Widget page) =>
+      InkWell(
+        onTap: () {
+          Navigator.pop(context);
+          open(page);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 22),
+          child: Row(
+            children: [
+              DesignIcon(icon, color: const Color(0xff583c26)),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xff583c26),
+                    height: 24 / 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+}
+
+class FeedbackPage extends StatefulWidget {
+  const FeedbackPage({super.key});
+  @override
+  State<FeedbackPage> createState() => _FeedbackPageState();
+}
+
+class _FeedbackPageState extends State<FeedbackPage> {
+  final name = TextEditingController(),
+      email = TextEditingController(),
+      message = TextEditingController();
+  final form = GlobalKey<FormState>();
+  final id = const Uuid().v4();
+  bool busy = false;
+  String? error;
+  @override
+  void dispose() {
+    name.dispose();
+    email.dispose();
+    message.dispose();
+    super.dispose();
+  }
+
+  Future<void> send() async {
+    if (!form.currentState!.validate()) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      await api.call('POST', '/items/feedback', {
+        'id': id,
+        'data': {
+          'name': name.text.trim(),
+          'email': email.text.trim(),
+          'text': message.text.trim(),
+        },
+      });
+      if (mounted) {
+        Navigator.pop(context);
+        note('Спасибо! Ваше сообщение отправлено.');
+      }
+    } catch (e) {
+      if (mounted) setState(() => error = '$e');
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => PageFrame(
+    title: 'Обратная связь',
+    child: ListView(
+      padding: const EdgeInsets.all(15),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: divider),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Form(
+            key: form,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Мы очень любим животных и делаем всё, чтобы улучшить их жизнь, а также решать проблемы, с которыми Вы сталкиваетесь.\n\nПоэтому нам очень важно Ваше мнение об этом приложении.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    height: 20 / 14,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: name,
+                  enabled: !busy,
+                  decoration: const InputDecoration(hintText: 'Имя'),
+                  validator: (v) =>
+                      (v ?? '').trim().isEmpty ? 'Укажите имя' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: email,
+                  enabled: !busy,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: 'Электронная почта',
+                  ),
+                  validator: (v) =>
+                      RegExp(
+                        r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+                      ).hasMatch((v ?? '').trim())
+                      ? null
+                      : 'Укажите электронную почту',
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: message,
+                  enabled: !busy,
+                  minLines: 8,
+                  maxLines: 12,
+                  decoration: const InputDecoration(hintText: 'Ваше мнение'),
+                  validator: (v) =>
+                      (v ?? '').trim().isEmpty ? 'Напишите сообщение' : null,
+                ),
+                if (error != null)
+                  Text(error!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 20),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xfff5a623),
+                    minimumSize: const Size(48, 54),
+                  ),
+                  onPressed: busy ? null : send,
+                  child: Text(busy ? 'Отправка…' : 'Отправить'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -302,7 +441,8 @@ class _SettingsPageState extends State<SettingsPage> {
 }
 
 class LinkContactPage extends StatefulWidget {
-  const LinkContactPage({super.key});
+  const LinkContactPage({super.key, this.initialContact = ''});
+  final String initialContact;
   @override
   State<LinkContactPage> createState() => _LinkContactPageState();
 }
@@ -312,6 +452,12 @@ class _LinkContactPageState extends State<LinkContactPage> {
   Map<String, dynamic>? challenge;
   bool busy = false;
   String? error;
+  @override
+  void initState() {
+    super.initState();
+    contact.text = widget.initialContact;
+  }
+
   @override
   void dispose() {
     contact.dispose();

@@ -26,13 +26,10 @@ class _ChatsPaneState extends State<ChatsPane> {
     pollSeconds: 6,
     emptyTitle: Ru.text156,
     emptyText: Ru.text155,
+    padding: const EdgeInsets.symmetric(horizontal: 15),
     header: Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextField(
-        decoration: const InputDecoration(
-          hintText: Ru.text154,
-          prefixIcon: Icon(Icons.search),
-        ),
+      padding: const EdgeInsets.only(top: 18, bottom: 4),
+      child: SearchBox(
         onChanged: (v) {
           timer?.cancel();
           timer = Timer(
@@ -43,28 +40,65 @@ class _ChatsPaneState extends State<ChatsPane> {
       ),
     ),
     tile: (i) {
-      final p = i['profile'];
-      return Card(
-        child: ListTile(
-          leading: Avatar(p['pet']?['photo']),
-          title: Text(p['pet']?['name'] ?? p['owner']['name'] ?? ''),
-          subtitle: Text(
-            i['last']?['data']?['text'] ?? Ru.text153,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+      final p = i['profile'], owner = p['owner'] as Map;
+      final name = '${owner['name'] ?? ''} ${owner['surname'] ?? ''}'.trim();
+      return InkWell(
+        onTap: () => open(ChatPage(cid: i['id'])),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 108),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: const BoxDecoration(
+            border: Border(bottom: BorderSide(color: divider)),
           ),
-          trailing: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              if (i['last'] != null)
-                Text(
-                  stamp(i['last']['created']),
-                  style: const TextStyle(fontSize: 10, color: muted),
+              PairedAvatar(
+                pet: owner['photo'],
+                owner: p['pet']?['photo'],
+                size: 80,
+                ownerSize: 24,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name.isNotEmpty ? name : p['pet']?['name'] ?? '',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        height: 22 / 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      i['last']?['data']?['text'] ?? Ru.text153,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: muted,
+                        height: 16 / 12,
+                      ),
+                    ),
+                    if (i['last'] != null)
+                      Text(
+                        stamp(i['last']['created']),
+                        style: const TextStyle(fontSize: 10, color: iconGrey),
+                      ),
+                  ],
                 ),
-              if (i['unread'] > 0) Badge(label: Text('${i['unread']}')),
+              ),
+              const SizedBox(width: 6),
+              if (i['unread'] > 0)
+                Badge(
+                  backgroundColor: yellow,
+                  textColor: ink,
+                  label: Text('${i['unread']}'),
+                ),
             ],
           ),
-          onTap: () => open(ChatPage(cid: i['id'])),
         ),
       );
     },

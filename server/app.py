@@ -253,9 +253,17 @@ def item_json(db, i, me):
         if p
         else (a.profile.get("name", "") if a else "Удалённый аккаунт"),
         "avatar": p.data.get("photo") if p else None,
+        "owner_avatar": a.profile.get("photo") if a else None,
         "likes": len(reactions),
         "liked": any(r.source == me for r in reactions),
     }
+    if i.kind == "posts":
+        d["comments"] = db.scalar(
+            select(func.count()).select_from(Item).where(
+                Item.kind == "comments", Item.target == i.id, Item.hidden.is_(False),
+                Item.owner.not_in(blocked_ids(db, me)),
+            )
+        )
     if i.kind == "messages":
         e = conversation(db, me, i.target)
         other = e.target if e.source == i.owner else e.source

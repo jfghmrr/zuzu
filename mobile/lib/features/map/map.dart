@@ -9,8 +9,8 @@ class MapPane extends StatefulWidget {
 class _MapPaneState extends State<MapPane> {
   final controller = MapController();
   LatLng point = const LatLng(55.751244, 37.618423);
-  List<Map<String, dynamic>> items = [];
-  bool news = false, loading = false, selected = false, ready = false;
+  List<Map<String, dynamic>> items = [], newsItems = [];
+  bool loading = false, selected = false, ready = false;
   String? error;
   Timer? debounce;
   int generation = 0;
@@ -30,24 +30,29 @@ class _MapPaneState extends State<MapPane> {
     setState(() => loading = true);
     try {
       final b = controller.camera.visibleBounds;
-      final all = <Map<String, dynamic>>[];
-      Map? cursor;
-      do {
-        var path =
-            '/items/${news ? 'news' : 'markers'}?limit=50&west=${b.west}&south=${b.south}&east=${b.east}&north=${b.north}';
-        if (cursor != null) {
-          path +=
-              '&before=${cursor['before']}&cursor_id=${cursor['cursor_id']}';
-        }
-        final r = await api.call('GET', path);
-        all.addAll(
-          (r['items'] as List).map((e) => Map<String, dynamic>.from(e)),
-        );
-        cursor = r['next'];
-      } while (cursor != null && gen == generation);
+      final fetched = <String, List<Map<String, dynamic>>>{};
+      for (final kind in ['markers', 'news']) {
+        final all = <Map<String, dynamic>>[];
+        Map? cursor;
+        do {
+          var path =
+              '/items/$kind?limit=50&west=${b.west}&south=${b.south}&east=${b.east}&north=${b.north}';
+          if (cursor != null) {
+            path +=
+                '&before=${cursor['before']}&cursor_id=${cursor['cursor_id']}';
+          }
+          final r = await api.call('GET', path);
+          all.addAll(
+            (r['items'] as List).map((e) => Map<String, dynamic>.from(e)),
+          );
+          cursor = r['next'];
+        } while (cursor != null && gen == generation);
+        fetched[kind] = all;
+      }
       if (mounted && gen == generation) {
         setState(() {
-          items = all;
+          items = fetched['markers']!;
+          newsItems = fetched['news']!;
           error = null;
         });
       }
@@ -154,42 +159,18 @@ class _MapPaneState extends State<MapPane> {
           },
           icon: g.length > 1
               ? Text('${g.length}')
-              : Icon(news ? Icons.newspaper : Icons.pets),
+              : const DesignIcon('pin', color: Colors.white),
         ),
       );
     }).toList();
   }
 
   @override
-  Widget build(BuildContext context) => Column(
+  Widget build(BuildContext context) => ListView(
+    padding: EdgeInsets.zero,
     children: [
-      Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Expanded(
-              child: SegmentedButton<bool>(
-                segments: const [
-                  ButtonSegment(value: false, label: Text(Ru.text191)),
-                  ButtonSegment(value: true, label: Text(Ru.text190)),
-                ],
-                selected: {news},
-                onSelectionChanged: (s) {
-                  setState(() => news = s.first);
-                  load();
-                },
-              ),
-            ),
-            IconButton(
-              tooltip: Ru.text189,
-              onPressed: locate,
-              icon: const Icon(Icons.my_location),
-            ),
-          ],
-        ),
-      ),
-      Expanded(
-        flex: 3,
+      SizedBox(
+        height: 500,
         child: Stack(
           children: [
             FlutterMap(
@@ -249,62 +230,139 @@ class _MapPaneState extends State<MapPane> {
               ],
             ),
             Positioned(
-              left: 12,
-              right: 12,
-              top: 8,
-              child: IgnorePointer(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                      selected
-                          ? '${point.latitude.toStringAsFixed(4)}, ${point.longitude.toStringAsFixed(4)}'
-                          : Ru.text188,
-                    ),
-                  ),
+              left: 0,
+              top: 10,
+              child: Material(
+                color: yellow,
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(3),
+                ),
+                child: IconButton(
+                  tooltip: 'Добавить на карту',
+                  onPressed: add,
+                  icon: const DesignIcon('plus', color: ink),
                 ),
               ),
             ),
             Positioned(
-              bottom: 32,
-              right: 16,
-              child: FloatingActionButton(
-                tooltip: Ru.text187,
-                onPressed: add,
-                child: const Icon(Icons.add),
+              right: 12,
+              bottom: 40,
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(),
+                child: IconButton(
+                  tooltip: Ru.text189,
+                  onPressed: locate,
+                  icon: const Icon(Icons.my_location, color: ink),
+                ),
               ),
             ),
+            if (selected)
+              Positioned(
+                left: 54,
+                top: 12,
+                right: 12,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    color: Colors.white,
+                    child: const Text(
+                      'Точка выбрана. Нажмите +, чтобы добавить метку.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ),
+              ),
             if (loading) const LinearProgressIndicator(),
           ],
         ),
       ),
-      Expanded(
-        flex: 2,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+      const Padding(
+        padding: EdgeInsets.symmetric(vertical: 14),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              news ? Ru.text186 : Ru.text185,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            if (error != null) Failure(message: error!, retry: load),
-            if (items.isEmpty && !loading)
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: Text(Ru.text184),
-              ),
-            ...items.map(
-              (i) => Card(
-                child: ListTile(
-                  title: Text(i['data']['title']),
-                  subtitle: Text('${i['author']} · ${stamp(i['created'])}'),
-                  onTap: () async {
-                    await open(ItemPage(item: i));
+            DesignIcon('pin', size: 20, color: Color(0xffff9900)),
+            SizedBox(width: 8),
+            Text('Метки пользователей', style: TextStyle(fontSize: 14)),
+          ],
+        ),
+      ),
+      Container(
+        margin: const EdgeInsets.fromLTRB(15, 0, 15, 24),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: paper,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Лента новостей',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                IconButton(
+                  tooltip: 'Добавить новость',
+                  onPressed: () async {
+                    if (!selected) {
+                      note(Ru.text194);
+                      return;
+                    }
+                    await open(
+                      ItemEditor(
+                        kind: 'news',
+                        defaults: {
+                          'lat': point.latitude,
+                          'lng': point.longitude,
+                          'city': api.me?['pet']?['city'] ?? '',
+                        },
+                      ),
+                    );
                     if (mounted) load();
                   },
+                  icon: const DesignIcon('plus', color: ink, size: 20),
+                ),
+              ],
+            ),
+            const Divider(),
+            const SizedBox(height: 12),
+            if (error != null) Failure(message: error!, retry: load),
+            if (newsItems.isEmpty && !loading && error == null)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 15),
+                child: Text(
+                  'В этой области пока нет новостей.',
+                  style: TextStyle(fontSize: 14, color: muted),
                 ),
               ),
-            ),
+            for (final i in newsItems)
+              InkWell(
+                onTap: () async {
+                  await open(ItemPage(item: i));
+                  if (mounted) load();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  child: Row(
+                    children: [
+                      const DesignIcon('comment', size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${i['author']} · ${i['data']['title']}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

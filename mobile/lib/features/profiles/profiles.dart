@@ -13,6 +13,7 @@ class _ProfileEditorState extends State<ProfileEditor> {
   String status = Ru.text274, sex = Ru.text266;
   String? ownerPhoto, petPhoto, error;
   bool busy = false, approx = true;
+  int onboardingStep = 0;
   final ownerFields = const [
     FieldSpec('name', Ru.text50, required: true),
     FieldSpec('surname', Ru.text291),
@@ -46,6 +47,16 @@ class _ProfileEditorState extends State<ProfileEditor> {
     controls['birth_date'] = TextEditingController(
       text: '${p['birth_date'] ?? ''}',
     );
+    if (widget.onboarding) {
+      if (controls['handle']!.text.isEmpty) {
+        controls['handle']!.text =
+            'u_${const Uuid().v4().replaceAll('-', '').substring(0, 12)}';
+      }
+      if (controls['pet_handle']!.text.isEmpty) {
+        controls['pet_handle']!.text =
+            'p_${const Uuid().v4().replaceAll('-', '').substring(0, 12)}';
+      }
+    }
     status = o['status'] ?? status;
     sex = p['sex'] ?? sex;
     ownerPhoto = o['photo'];
@@ -157,133 +168,304 @@ class _ProfileEditorState extends State<ProfileEditor> {
           f.required && (v ?? '').trim().isEmpty ? Ru.text279 : null,
     ),
   );
-  @override
-  Widget build(BuildContext context) => PageFrame(
-    title: widget.onboarding ? Ru.text278 : Ru.text252,
-    child: Form(
-      key: form,
-      child: ListView(
-        padding: const EdgeInsets.all(22),
-        children: [
-          const Text(
-            Ru.text277,
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+  Widget onboardingField(String key, String hint, {bool required = false}) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: TextFormField(
+          controller: controls[key],
+          enabled: !busy,
+          style: const TextStyle(fontSize: 16, height: 22 / 16),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              fontSize: 16,
+              color: Color(0xff8e9baa),
+              height: 22 / 16,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 15,
+              vertical: 15,
+            ),
           ),
-          const SizedBox(height: 16),
-          Center(
-            child: Column(
-              children: [
-                Avatar(ownerPhoto, size: 90),
-                TextButton(
-                  onPressed: busy ? null : () => photo(false),
-                  child: const Text(Ru.text276),
+          validator: (v) =>
+              required && (v ?? '').trim().isEmpty ? Ru.text279 : null,
+        ),
+      );
+  Widget onboarding(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: Text(
+        onboardingStep == 0 ? 'Ваш профиль' : 'Профиль питомца',
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+      ),
+      leading: onboardingStep == 1
+          ? BackButton(onPressed: () => setState(() => onboardingStep = 0))
+          : null,
+    ),
+    body: SafeArea(
+      top: false,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: divider),
                 ),
-              ],
-            ),
-          ),
-          ...ownerFields.map(field),
-          DropdownButtonFormField<String>(
-            initialValue: status,
-            isExpanded: true,
-            decoration: const InputDecoration(labelText: Ru.text275),
-            items: [
-              Ru.text274,
-              Ru.text273,
-              Ru.text272,
-            ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-            onChanged: busy ? null : (v) => setState(() => status = v!),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text(
-              Ru.text271,
-              style: TextStyle(color: muted, fontSize: 12),
-            ),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            Ru.text270,
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
-          const Text(Ru.text269, style: TextStyle(color: muted)),
-          const SizedBox(height: 18),
-          Center(
-            child: Column(
-              children: [
-                Avatar(petPhoto, size: 105),
-                TextButton(
-                  onPressed: busy ? null : () => photo(true),
-                  child: const Text(Ru.text268),
+                padding: const EdgeInsets.fromLTRB(14, 26, 14, 20),
+                child: Form(
+                  key: form,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: InkWell(
+                          onTap: busy ? null : () => photo(onboardingStep == 1),
+                          child: Semantics(
+                            button: true,
+                            label: onboardingStep == 0
+                                ? 'Добавить своё фото'
+                                : 'Добавить фото питомца',
+                            child: Avatar(
+                              onboardingStep == 0 ? ownerPhoto : petPhoto,
+                              size: 116,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (onboardingStep == 0) ...[
+                        onboardingField('name', 'Имя', required: true),
+                        onboardingField('surname', 'Фамилия'),
+                        const Text(
+                          'Статус',
+                          style: TextStyle(color: muted, fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final value in [
+                              Ru.text273,
+                              Ru.text272,
+                              Ru.text274,
+                            ])
+                              Semantics(
+                                selected: status == value,
+                                child: TextButton(
+                                  style: TextButton.styleFrom(
+                                    minimumSize: const Size(0, 32),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                    backgroundColor: status == value
+                                        ? const Color(0xfffff8ed)
+                                        : paper,
+                                    foregroundColor: status == value
+                                        ? const Color(0xfff5a623)
+                                        : ink,
+                                    shape: const StadiumBorder(),
+                                  ),
+                                  onPressed: busy
+                                      ? null
+                                      : () => setState(() => status = value),
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      height: 20 / 14,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ] else ...[
+                        onboardingField('pet_name', 'Кличка', required: true),
+                        onboardingField(
+                          'species',
+                          'Вид питомца',
+                          required: true,
+                        ),
+                        onboardingField('breed', 'Порода'),
+                        onboardingField(
+                          'description',
+                          'Статус (немного о питомце)',
+                        ),
+                        onboardingField('city', 'Город', required: true),
+                      ],
+                      if (error != null)
+                        Text(error!, style: const TextStyle(color: Colors.red)),
+                      const Spacer(),
+                      const SizedBox(height: 20),
+                      FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xfff5a623),
+                          minimumSize: const Size(48, 54),
+                        ),
+                        onPressed: busy
+                            ? null
+                            : () {
+                                if (!form.currentState!.validate()) return;
+                                if (onboardingStep == 0) {
+                                  setState(() {
+                                    onboardingStep = 1;
+                                    error = null;
+                                  });
+                                } else {
+                                  save();
+                                }
+                              },
+                        child: Text(
+                          busy
+                              ? Ru.text2
+                              : onboardingStep == 0
+                              ? 'Далее'
+                              : 'Готово',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-          ...petFields.map(field),
-          DropdownButtonFormField<String>(
-            initialValue: sex,
-            decoration: const InputDecoration(labelText: Ru.text267),
-            items: [
-              Ru.text266,
-              Ru.text265,
-              Ru.text264,
-            ].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-            onChanged: busy ? null : (v) => setState(() => sex = v!),
-          ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text(Ru.text263),
-            value: approx,
-            onChanged: busy ? null : (v) => setState(() => approx = v),
-          ),
-          if (approx)
-            TextFormField(
-              controller: controls['age'],
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: Ru.text262),
-            )
-          else
-            TextFormField(
-              controller: controls['birth_date'],
-              readOnly: true,
-              decoration: const InputDecoration(
-                labelText: Ru.text261,
-                suffixIcon: Icon(Icons.calendar_month),
               ),
-              onTap: () async {
-                final d = await showDatePicker(
-                  context: context,
-                  initialDate:
-                      DateTime.tryParse(controls['birth_date']!.text) ??
-                      DateTime.now(),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now(),
-                );
-                if (d != null) {
-                  controls['birth_date']!.text = DateFormat(
-                    'yyyy-MM-dd',
-                  ).format(d);
-                }
-              },
-            ),
-          const SizedBox(height: 22),
-          if (error != null)
-            Text(error!, style: const TextStyle(color: Colors.red)),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: busy ? null : save,
-            child: Text(
-              busy
-                  ? Ru.text2
-                  : widget.onboarding
-                  ? Ru.text260
-                  : Ru.text1,
             ),
           ),
-        ],
+        ),
       ),
     ),
   );
+  @override
+  Widget build(BuildContext context) => widget.onboarding
+      ? onboarding(context)
+      : PageFrame(
+          title: widget.onboarding ? Ru.text278 : Ru.text252,
+          child: Form(
+            key: form,
+            child: ListView(
+              padding: const EdgeInsets.all(22),
+              children: [
+                const Text(
+                  Ru.text277,
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: Column(
+                    children: [
+                      Avatar(ownerPhoto, size: 90),
+                      TextButton(
+                        onPressed: busy ? null : () => photo(false),
+                        child: const Text(Ru.text276),
+                      ),
+                    ],
+                  ),
+                ),
+                ...ownerFields.map(field),
+                DropdownButtonFormField<String>(
+                  initialValue: status,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: Ru.text275),
+                  items: [Ru.text274, Ru.text273, Ru.text272]
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
+                  onChanged: busy ? null : (v) => setState(() => status = v!),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    Ru.text271,
+                    style: TextStyle(color: muted, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  Ru.text270,
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                ),
+                const Text(Ru.text269, style: TextStyle(color: muted)),
+                const SizedBox(height: 18),
+                Center(
+                  child: Column(
+                    children: [
+                      Avatar(petPhoto, size: 105),
+                      TextButton(
+                        onPressed: busy ? null : () => photo(true),
+                        child: const Text(Ru.text268),
+                      ),
+                    ],
+                  ),
+                ),
+                ...petFields.map(field),
+                DropdownButtonFormField<String>(
+                  initialValue: sex,
+                  decoration: const InputDecoration(labelText: Ru.text267),
+                  items: [Ru.text266, Ru.text265, Ru.text264]
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
+                  onChanged: busy ? null : (v) => setState(() => sex = v!),
+                ),
+                const SizedBox(height: 16),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(Ru.text263),
+                  value: approx,
+                  onChanged: busy ? null : (v) => setState(() => approx = v),
+                ),
+                if (approx)
+                  TextFormField(
+                    controller: controls['age'],
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: Ru.text262),
+                  )
+                else
+                  TextFormField(
+                    controller: controls['birth_date'],
+                    readOnly: true,
+                    decoration: const InputDecoration(
+                      labelText: Ru.text261,
+                      suffixIcon: Icon(Icons.calendar_month),
+                    ),
+                    onTap: () async {
+                      final d = await showDatePicker(
+                        context: context,
+                        initialDate:
+                            DateTime.tryParse(controls['birth_date']!.text) ??
+                            DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
+                      if (d != null) {
+                        controls['birth_date']!.text = DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(d);
+                      }
+                    },
+                  ),
+                const SizedBox(height: 22),
+                if (error != null)
+                  Text(error!, style: const TextStyle(color: Colors.red)),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: busy ? null : save,
+                  child: Text(
+                    busy
+                        ? Ru.text2
+                        : widget.onboarding
+                        ? Ru.text260
+                        : Ru.text1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
 }
 
 class ProfilePane extends StatefulWidget {
@@ -311,6 +493,35 @@ class _ProfilePaneState extends State<ProfilePane> {
     list.currentState?.reload();
   }
 
+  Future<void> menu(String action, Map p) => guarded(() async {
+    switch (action) {
+      case 'edit':
+        await open(const ProfileEditor());
+        refresh();
+      case 'copy':
+        await Clipboard.setData(
+          ClipboardData(
+            text: 'zuzu://profile/${p['pet']?['handle'] ?? p['id']}',
+          ),
+        );
+        note(Ru.text241);
+      case 'blocked':
+        await open(const RelationshipsPage(blocked: true));
+      case 'friend':
+        await api.call('PUT', '/relationships/${p['id']}/friend', {
+          'operation': 'request',
+        });
+        note(Ru.text247);
+      case 'block':
+        if (await confirm(Ru.text244, Ru.text243)) {
+          await api.call('PUT', '/relationships/${p['id']}/block', {
+            'active': true,
+          });
+          api.invalidateImages();
+          refresh();
+        }
+    }
+  });
   @override
   Widget build(BuildContext context) => FutureBuilder(
     future: future,
@@ -324,193 +535,212 @@ class _ProfilePaneState extends State<ProfilePane> {
       return PagedList(
         key: list,
         path: '/items/posts?owner=${p['id']}',
+        padding: EdgeInsets.zero,
         emptyTitle: Ru.text259,
         emptyText: own ? Ru.text258 : Ru.text257,
         tile: (i) => PostCard(item: i, changed: refresh),
+        contentBuilder: (items) => Wrap(
+          children: [
+            for (final item in items)
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width / 2,
+                height: MediaQuery.sizeOf(context).width / 2,
+                child: InkWell(
+                  onTap: () => open(
+                    PageFrame(
+                      title: 'Публикация',
+                      child: SingleChildScrollView(
+                        child: PostCard(item: item, changed: refresh),
+                      ),
+                    ),
+                  ),
+                  child: (item['data']['media'] as List? ?? []).isNotEmpty
+                      ? Photo(item['data']['media'][0])
+                      : Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(15),
+                          child: Center(
+                            child: Text(
+                              '${item['data']['text'] ?? ''}',
+                              maxLines: 6,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ),
+                ),
+              ),
+          ],
+        ),
         header: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: yellow,
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: 155,
-                    height: 132,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: 4,
-                          top: 0,
-                          child: Avatar(pet['photo'], size: 124),
+            Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(top: 75),
+                  padding: const EdgeInsets.fromLTRB(15, 64, 15, 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        '${pet['name'] ?? ''}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          height: 24 / 18,
                         ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: yellow,
-                              shape: BoxShape.circle,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '@${pet['handle'] ?? ''}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: muted,
+                          height: 16 / 12,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '${pet['breed']?.isNotEmpty == true ? pet['breed'] : pet['species'] ?? ''}',
+                        style: const TextStyle(fontSize: 14, height: 20 / 14),
+                      ),
+                      if ((pet['description'] ?? '').isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            pet['description'],
+                            style: const TextStyle(
+                              fontSize: 14,
+                              height: 20 / 14,
                             ),
-                            child: Avatar(owner['photo'], size: 52),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    '${pet['name'] ?? owner['name'] ?? Ru.text256}',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    '@${pet['handle'] ?? p['handle'] ?? ''}',
-                    style: const TextStyle(color: muted),
-                  ),
-                  const SizedBox(height: 10),
-                  Text('${pet['species'] ?? ''} · ${pet['city'] ?? ''}'),
-                  if ((pet['description'] ?? '').isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(
-                        pet['description'],
-                        textAlign: TextAlign.center,
+                      const SizedBox(height: 8),
+                      Text(
+                        '${pet['city'] ?? ''}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: muted,
+                          height: 16 / 12,
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    spacing: 24,
-                    runSpacing: 14,
-                    children: [
-                      _stat('${p['friends']}', Ru.text255),
-                      _stat('${p['followers']}', Ru.text254),
-                      _stat('${p['achievements']}', Ru.text253),
                     ],
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Avatar(owner['photo']),
-              title: Text('${owner['name'] ?? ''} ${owner['surname'] ?? ''}'),
-              subtitle: Text('${owner['status'] ?? ''} · ${p['level']}'),
-            ),
-            if (own) ...[
-              OutlinedButton.icon(
-                onPressed: () async {
-                  await open(const ProfileEditor());
-                  refresh();
-                },
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text(Ru.text252),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ActionChip(
-                    avatar: const Icon(Icons.folder_outlined, size: 18),
-                    label: const Text(Ru.text136),
-                    onPressed: () => open(const VetPage()),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.event_outlined, size: 18),
-                    label: const Text(Ru.text135),
-                    onPressed: () => open(const RemindersPage()),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.people_outline, size: 18),
-                    label: const Text(Ru.text251),
-                    onPressed: () => open(const RelationshipsPage()),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              FilledButton.icon(
-                onPressed: () async {
-                  await open(const ItemEditor(kind: 'posts'));
-                  refresh();
-                },
-                icon: const Icon(Icons.add),
-                label: const Text(Ru.text250),
-              ),
-            ] else ...[
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  FilledButton(
-                    onPressed: () => guarded(() async {
-                      await api.call(
-                        'PUT',
-                        '/relationships/${p['id']}/follow',
-                        {'active': p['following'] != true},
-                      );
-                      refresh();
-                    }),
-                    child: Text(
-                      p['following'] == true ? Ru.text249 : Ru.text248,
+                ),
+                Positioned(
+                  top: 18,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: PairedAvatar(
+                      pet: pet['photo'],
+                      owner: owner['photo'],
+                      size: 112,
+                      ownerSize: 40,
                     ),
                   ),
-                  OutlinedButton(
-                    onPressed: () => guarded(() async {
-                      await api.call(
-                        'PUT',
-                        '/relationships/${p['id']}/friend',
-                        {'operation': 'request'},
-                      );
-                      note(Ru.text247);
-                    }),
-                    child: const Text(Ru.text246),
+                ),
+                Positioned(
+                  right: 6,
+                  top: 5,
+                  child: PopupMenuButton<String>(
+                    tooltip: 'Действия с профилем',
+                    onSelected: (v) => menu(v, p),
+                    icon: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                      child: const Icon(
+                        Icons.more_vert,
+                        size: 20,
+                        color: muted,
+                      ),
+                    ),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: own ? 'edit' : 'friend',
+                        child: Text(
+                          own ? 'Редактировать' : 'Добавить в друзья',
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'copy',
+                        child: Text('Скопировать ссылку'),
+                      ),
+                      PopupMenuItem(
+                        value: own ? 'blocked' : 'block',
+                        child: Text(own ? 'Чёрный список' : 'Заблокировать'),
+                      ),
+                    ],
                   ),
-                  OutlinedButton(
-                    onPressed: () => startChat(p['id']),
-                    child: const Text(Ru.text245),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _panel(
+              Row(
+                children: [
+                  Expanded(
+                    child: _pill(
+                      own
+                          ? 'Вет паспорт'
+                          : p['following'] == true
+                          ? '✓ Вы подписаны'
+                          : 'Подписаться',
+                      () => own
+                          ? open(const VetPage())
+                          : guarded(() async {
+                              await api.call(
+                                'PUT',
+                                '/relationships/${p['id']}/follow',
+                                {'active': p['following'] != true},
+                              );
+                              refresh();
+                            }),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _pill(
+                      own ? 'Напоминания' : 'Написать',
+                      () => own
+                          ? open(const RemindersPage())
+                          : startChat(p['id']),
+                    ),
                   ),
                 ],
               ),
-              TextButton(
-                onPressed: () => guarded(() async {
-                  if (await confirm(Ru.text244, Ru.text243)) {
-                    await api.call('PUT', '/relationships/${p['id']}/block', {
-                      'active': true,
-                    });
-                    api.invalidateImages();
-                    refresh();
-                  }
-                }),
-                child: const Text(Ru.text242),
-              ),
-            ],
-            TextButton.icon(
-              onPressed: () async {
-                await Clipboard.setData(
-                  ClipboardData(
-                    text: 'zuzu://profile/${pet['handle'] ?? p['id']}',
-                  ),
-                );
-                note(Ru.text241);
-              },
-              icon: const Icon(Icons.link),
-              label: const Text(Ru.text240),
             ),
-            const Padding(
-              padding: EdgeInsets.only(top: 18, bottom: 10),
-              child: Text(
-                Ru.text239,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            const SizedBox(height: 10),
+            _panel(
+              Row(
+                children: [
+                  Expanded(
+                    child: _stat(
+                      '${p['friends']}',
+                      'Друзья',
+                      own ? () => open(const RelationshipsPage()) : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _stat(
+                      '${p['followers']}',
+                      'Подписчики',
+                      own ? () => open(const RelationshipsPage()) : null,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -518,14 +748,47 @@ class _ProfilePaneState extends State<ProfilePane> {
       );
     },
   );
-  Widget _stat(String value, String label) => Column(
-    children: [
-      Text(
-        value,
-        style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w800),
+  Widget _panel(Widget child) => Container(
+    padding: const EdgeInsets.all(15),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: child,
+  );
+  Widget _pill(String title, VoidCallback onTap) => TextButton(
+    style: TextButton.styleFrom(
+      backgroundColor: paper,
+      foregroundColor: ink,
+      minimumSize: const Size(48, 36),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      shape: const StadiumBorder(),
+    ),
+    onPressed: onTap,
+    child: Text(
+      title,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 14),
+    ),
+  );
+  Widget _stat(String value, String label, VoidCallback? onTap) => InkWell(
+    onTap: onTap,
+    child: Container(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      decoration: BoxDecoration(
+        color: paper,
+        borderRadius: BorderRadius.circular(16),
       ),
-      Text(label, style: const TextStyle(fontSize: 12, color: muted)),
-    ],
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          Text(label, style: const TextStyle(fontSize: 14, color: muted)),
+        ],
+      ),
+    ),
   );
 }
 

@@ -15,41 +15,15 @@ class _FeedPaneState extends State<FeedPane> {
     emptyTitle: Ru.text233,
     emptyText: Ru.text232,
     tile: (i) => PostCard(item: i, changed: () => key.currentState?.reload()),
+    padding: EdgeInsets.zero,
     header: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          Ru.text231,
-          style: TextStyle(
-            fontSize: 28,
-            height: 1.15,
-            fontWeight: FontWeight.w800,
-          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(15, 14, 15, 20),
+          child: SearchBox(onTap: () => open(const SearchPage())),
         ),
-        const SizedBox(height: 18),
         const StoryStrip(),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton.icon(
-                onPressed: () async {
-                  await open(const ItemEditor(kind: 'posts'));
-                  key.currentState?.reload();
-                },
-                icon: const Icon(Icons.add),
-                label: const Text(Ru.text230),
-              ),
-            ),
-            const SizedBox(width: 10),
-            IconButton.outlined(
-              tooltip: Ru.text229,
-              onPressed: () => open(const SearchPage()),
-              icon: const Icon(Icons.search),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
       ],
     ),
   );
@@ -96,21 +70,34 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final d = item['data'] as Map, text = '${d['text'] ?? ''}';
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.only(bottom: 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            child: Row(
               children: [
-                Avatar(item['avatar'], size: 44),
-                const SizedBox(width: 12),
+                InkWell(
+                  onTap: () => open(
+                    PageFrame(
+                      title: Ru.text94,
+                      child: ProfilePane(account: item['owner_id']),
+                    ),
+                  ),
+                  child: PairedAvatar(
+                    pet: item['avatar'],
+                    owner: item['owner_avatar'],
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: InkWell(
                     onTap: () => open(
                       PageFrame(
-                        title: Ru.text228,
+                        title: Ru.text94,
                         child: ProfilePane(account: item['owner_id']),
                       ),
                     ),
@@ -120,13 +107,18 @@ class _PostCardState extends State<PostCard> {
                         Text(
                           item['author'],
                           style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            height: 20 / 14,
                           ),
                         ),
                         Text(
                           stamp(item['created']),
-                          style: const TextStyle(color: muted, fontSize: 12),
+                          style: const TextStyle(
+                            color: muted,
+                            fontSize: 12,
+                            height: 16 / 12,
+                          ),
                         ),
                       ],
                     ),
@@ -134,8 +126,9 @@ class _PostCardState extends State<PostCard> {
                 ),
                 PopupMenuButton<String>(
                   tooltip: Ru.text227,
-                  onSelected: (v) => guarded(() async {
-                    if (v == 'delete') {
+                  iconSize: 18,
+                  onSelected: (value) => guarded(() async {
+                    if (value == 'delete') {
                       if (await confirm(
                         Ru.text226,
                         Ru.text225,
@@ -165,59 +158,78 @@ class _PostCardState extends State<PostCard> {
                 ),
               ],
             ),
-            if ((d['media'] as List? ?? []).isNotEmpty) ...[
-              const SizedBox(height: 14),
-              Gallery(List<dynamic>.from(d['media'])),
-            ],
-            if (text.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                text,
-                maxLines: expanded ? null : 4,
-                overflow: expanded
-                    ? TextOverflow.visible
-                    : TextOverflow.ellipsis,
-                style: const TextStyle(height: 1.45),
+          ),
+          if (text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(15, 10, 15, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    maxLines: expanded ? null : 4,
+                    overflow: expanded
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 14, height: 20 / 14),
+                  ),
+                  if (text.length > 160)
+                    TextButton(
+                      onPressed: () => setState(() => expanded = !expanded),
+                      child: Text(expanded ? Ru.text224 : Ru.text223),
+                    ),
+                ],
               ),
-              if (text.length > 160)
-                TextButton(
-                  onPressed: () => setState(() => expanded = !expanded),
-                  child: Text(expanded ? Ru.text224 : Ru.text223),
-                ),
-            ],
-            const SizedBox(height: 8),
-            Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 6,
+            ),
+          if ((d['media'] as List? ?? []).isNotEmpty)
+            Gallery(
+              List<dynamic>.from(d['media']),
+              aspectRatio: 375 / 177,
+              radius: 0,
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 7),
+            child: Row(
               children: [
                 IconButton(
                   tooltip: item['liked'] == true ? Ru.text222 : Ru.text221,
                   onPressed: busy ? null : like,
-                  icon: Icon(
-                    item['liked'] == true
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    color: item['liked'] == true ? orange : brown,
+                  icon: DesignIcon(
+                    'heart',
+                    color: item['liked'] == true ? orange : ink,
                   ),
                 ),
-                TextButton(
-                  onPressed: () => open(
+                InkWell(
+                  onTap: () => open(
                     PeoplePage(
                       title: Ru.text220,
                       path: '/item/${item['id']}/likes',
                     ),
                   ),
-                  child: Text('${item['likes']}'),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 4,
+                    ),
+                    child: Text(
+                      '${item['likes']}',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 12),
                 TextButton.icon(
                   onPressed: () => open(CommentsPage(post: item['id'])),
-                  icon: const Icon(Icons.mode_comment_outlined),
-                  label: const Text(Ru.text219),
+                  icon: const DesignIcon('comment', color: ink),
+                  label: Text(
+                    '${item['comments'] ?? 0}',
+                    style: const TextStyle(color: ink),
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -12,7 +12,12 @@ class PageFrame extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(title), actions: actions),
+    appBar: AppBar(
+      title: title == Ru.text94 || title == Ru.text228
+          ? const BrandWordmark()
+          : Text(title),
+      actions: actions,
+    ),
     body: SafeArea(child: child),
   );
 }
@@ -138,7 +143,13 @@ class Avatar extends StatelessWidget {
   const Avatar(this.id, {super.key, this.size = 52});
   @override
   Widget build(BuildContext context) => ClipOval(
-    child: Photo(id, width: size, height: size),
+    child: id == null || id!.isEmpty
+        ? Image.asset(
+            'assets/brand/photo-placeholder.png',
+            width: size,
+            height: size,
+          )
+        : Photo(id, width: size, height: size),
   );
 }
 
@@ -182,6 +193,8 @@ class PagedList extends StatefulWidget {
   final Widget Function(Map<String, dynamic>) tile;
   final Widget? header;
   final int? pollSeconds;
+  final EdgeInsetsGeometry padding;
+  final Widget Function(List<Map<String, dynamic>>)? contentBuilder;
   const PagedList({
     super.key,
     required this.path,
@@ -190,6 +203,8 @@ class PagedList extends StatefulWidget {
     this.emptyText = Ru.text68,
     this.header,
     this.pollSeconds,
+    this.padding = const EdgeInsets.all(15),
+    this.contentBuilder,
   });
   @override
   State<PagedList> createState() => PagedListState();
@@ -278,7 +293,7 @@ class PagedListState extends State<PagedList> {
   Widget build(BuildContext context) => RefreshIndicator(
     onRefresh: reload,
     child: ListView(
-      padding: const EdgeInsets.all(18),
+      padding: widget.padding,
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         if (widget.header != null) widget.header!,
@@ -291,7 +306,10 @@ class PagedListState extends State<PagedList> {
           if (error != null) Failure(message: error!, retry: reload),
           if (rows.isEmpty && error == null)
             Empty(widget.emptyTitle, widget.emptyText),
-          ...rows.map(widget.tile),
+          if (widget.contentBuilder != null)
+            widget.contentBuilder!(rows)
+          else
+            ...rows.map(widget.tile),
           if (next != null)
             Padding(
               padding: const EdgeInsets.all(14),
@@ -308,7 +326,13 @@ class PagedListState extends State<PagedList> {
 
 class Gallery extends StatefulWidget {
   final List<dynamic> ids;
-  const Gallery(this.ids, {super.key});
+  final double aspectRatio, radius;
+  const Gallery(
+    this.ids, {
+    super.key,
+    this.aspectRatio = 1.14,
+    this.radius = 10,
+  });
   @override
   State<Gallery> createState() => _GalleryState();
 }
@@ -321,9 +345,9 @@ class _GalleryState extends State<Gallery> {
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(widget.radius),
           child: AspectRatio(
-            aspectRatio: 1.14,
+            aspectRatio: widget.aspectRatio,
             child: PageView(
               onPageChanged: (v) => setState(() => current = v),
               children: widget.ids

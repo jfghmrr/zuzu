@@ -1,0 +1,272 @@
+[
+  {
+    "level": "0",
+    "name": "Вет паспорт",
+    "node": "70:5187-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Обратная связь",
+    "node": "68:4544-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Бургер меню",
+    "node": "27:7259-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Загрузка",
+    "node": "28:11010-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Код входа/почта",
+    "node": "75:8988-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Код регистрации/номер",
+    "node": "111:7636-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Код входа/номер",
+    "node": "75:8921-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Вход",
+    "node": "111:7477-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Вход",
+    "node": "111:7411-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Регистрация",
+    "node": "111:7539-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Вход",
+    "node": "75:8849-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Приветствие",
+    "node": "27:3076-layers-panel-row"
+  },
+  {
+    "level": "1",
+    "name": "Frame 280232",
+    "node": "27:3077-layers-panel-row"
+  },
+  {
+    "level": "2",
+    "name": "Frame 280258",
+    "node": "27:3078-layers-panel-row"
+  },
+  {
+    "level": "2",
+    "name": "Frame 280342",
+    "node": "27:3179-layers-panel-row"
+  },
+  {
+    "level": "3",
+    "name": "Нажимая кнопку «Регистрация» или «У вас уже есть аккаунт», Вы подтверждаете, что ознакомились с Политикой конфиденциальности, и даёте согласие на обработку Ваших Персональных данных в соответствии с ней.",
+    "node": "27:3199-layers-panel-row"
+  },
+  {
+    "level": "3",
+    "name": "Frame 280344",
+    "node": "27:3198-layers-panel-row"
+  },
+  {
+    "level": "4",
+    "name": "image 54",
+    "node": "27:3161-layers-panel-row"
+  },
+  {
+    "level": "4",
+    "name": "Frame 280373",
+    "node": "111:7538-layers-panel-row"
+  },
+  {
+    "level": "5",
+    "name": "Frame 280343",
+    "node": "27:3180-layers-panel-row"
+  },
+  {
+    "level": "6",
+    "name": "Primary Button",
+    "node": "27:3165-layers-panel-row"
+  },
+  {
+    "level": "7",
+    "name": "umbrella",
+    "node": "27:3166-layers-panel-row"
+  },
+  {
+    "level": "8",
+    "name": "Vector",
+    "node": "255:4804-layers-panel-row"
+  },
+  {
+    "level": "7",
+    "name": "Button",
+    "node": "27:3168-layers-panel-row"
+  },
+  {
+    "level": "7",
+    "name": "umbrella",
+    "node": "27:3169-layers-panel-row"
+  },
+  {
+    "level": "8",
+    "name": "Vector",
+    "node": "255:4805-layers-panel-row"
+  },
+  {
+    "level": "7",
+    "name": "chevron-down",
+    "node": "27:3170-layers-panel-row"
+  },
+  {
+    "level": "8",
+    "name": "Vector",
+    "node": "255:4806-layers-panel-row"
+  },
+  {
+    "level": "5",
+    "name": "Body",
+    "node": "111:7536-layers-panel-row"
+  },
+  {
+    "level": "3",
+    "name": "Нажимая кнопку «Регистрация» или «У вас уже есть аккаунт», Вы подтверждаете, что ознакомились с Политикой конфиденциальности, и даёте согласие на обработку Ваших Персональных данных в соответствии с ней.",
+    "node": "27:3184-layers-panel-row"
+  },
+  {
+    "level": "1",
+    "name": "Buttons Container",
+    "node": "27:3137-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Меню",
+    "node": "27:2881-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Ellipse 65",
+    "node": "26:590-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Frame 280336",
+    "node": "139:3704-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Frame 280298",
+    "node": "16:11900-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Frame 280297",
+    "node": "16:11862-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Метка",
+    "node": "16:10784-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Новость",
+    "node": "16:11472-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Происшествие",
+    "node": "16:11154-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Карта",
+    "node": "16:10504-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Карта",
+    "node": "16:10234-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Чат",
+    "node": "26:2752-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Чат",
+    "node": "16:11783-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Чаты",
+    "node": "16:10156-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Frame 280335",
+    "node": "16:11109-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Профиль другого питомца",
+    "node": "74:4582-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Профиль питомца",
+    "node": "1:1947-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Профиль хозяина",
+    "node": "26:340-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Профиль хозяина",
+    "node": "1:1655-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Новая публикация",
+    "node": "26:519-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Новая публикация",
+    "node": "1:1597-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Поиск",
+    "node": "1:1472-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Уведомления",
+    "node": "1:1383-layers-panel-row"
+  },
+  {
+    "level": "0",
+    "name": "Лента",
+    "node": "1:1299-layers-panel-row"
+  }
+]

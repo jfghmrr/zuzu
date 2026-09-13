@@ -200,3 +200,24 @@ def test_unicode_search_and_moderator_map(client):
         == 200
     )
     assert post(c, a, "markers", payload["data"]).status_code == 422
+
+
+def test_feed_comment_counts_respect_blocking_and_deletion(client):
+    reset_rates()
+    c = client
+    a, aid = login(c)
+    b, bid = login(c)
+    pet(c, a)
+    pet(c, b)
+    avatar = photo(c, a, 'public')
+    assert c.put('/me/profile', headers=a, json={'name': 'Арина', 'status': 'Заботливый хозяин', 'handle': 'o_' + uuid.uuid4().hex[:10], 'photo': avatar}).status_code == 200
+    publication = post(c, a, 'posts', {'text': 'Запись'}).json()
+    comment = post(c, b, 'comments', {'text': 'Ответ'}, target=publication['id']).json()
+    feed = c.get('/item/' + publication['id'], headers=a).json()
+    assert feed['owner_avatar'] == avatar
+    assert feed['comments'] == 1
+    assert c.put(f'/relationships/{bid}/block', headers=a, json={'active': True}).status_code == 200
+    assert c.get('/item/' + publication['id'], headers=a).json()['comments'] == 0
+    assert c.put(f'/relationships/{bid}/block', headers=a, json={'active': False}).status_code == 200
+    assert c.delete('/item/' + comment['id'], headers=b).status_code == 200
+    assert c.get('/item/' + publication['id'], headers=a).json()['comments'] == 0
