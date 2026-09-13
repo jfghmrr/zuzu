@@ -1,0 +1,13 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -showdestinations -disableAutomaticPackageResolution -clonedSourcePackagesDirPath build/ios/SourcePackages
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  FlutterGeneratedPluginSwiftPackage: /Users/jfghmrr/Documents/Codex/2026-09-13/new-chat-4/outputs/zuzu/mobile/ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage
+
+
+
+	Ineligible destinations for the "Runner" scheme:
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 26.5 is not installed. Please download and install the platform from Xcode > Settings > Components. }

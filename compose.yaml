@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: zuzu
+      POSTGRES_USER: zuzu
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U zuzu]
+      interval: 5s
+      retries: 15
+  api:
+    build: ./server
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://zuzu:${POSTGRES_PASSWORD}@db:5432/zuzu
+      MEDIA_DIR: /data/media
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 5s
+      retries: 20
+    ports:
+      - 127.0.0.1:8000:8000
+    volumes:
+      - media:/data/media
+      - ./server/legal:/app/legal:ro
+    depends_on:
+      db:
+        condition: service_healthy
+  worker:
+    build: ./server
+    command: [python, worker.py]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://zuzu:${POSTGRES_PASSWORD}@db:5432/zuzu
+      MEDIA_DIR: /data/media
+    volumes:
+      - media:/data/media
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  database:
+  media:

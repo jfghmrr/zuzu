@@ -1,0 +1,43 @@
+Waiting for another flutter command to release the startup lock...
+[!] Flutter (Channel stable, 3.47.4, on macOS 26.5.1 25F80 darwin-arm64, locale ru-RU) [129ms]
+    • Flutter version 3.47.4 on channel stable at /Users/jfghmrr/Documents/Codex/2026-09-13/new-chat-4/work/flutter
+    ! The flutter binary is not on your path. Consider adding /Users/jfghmrr/Documents/Codex/2026-09-13/new-chat-4/work/flutter/bin to your path.
+    ! The dart binary is not on your path. Consider adding /Users/jfghmrr/Documents/Codex/2026-09-13/new-chat-4/work/flutter/bin to your path.
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision 9584c6713b (3 days ago), 2026-09-10 15:25:10 -0700
+    • Engine revision 06a2e2a110
+    • Dart version 3.13.3
+    • DevTools version 2.60.0
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, enable-record-use, enable-swift-package-manager, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform update checks and upgrades.
+
+[✗] Android toolchain - develop for Android devices [81ms]
+    ✗ Unable to locate Android SDK.
+      Install Android Studio from: https://developer.android.com/studio/index.html
+      On first launch it will assist you in installing the Android SDK components.
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+      If the Android SDK has been installed to a custom location, please use
+      `flutter config --android-sdk` to update to that location.
+
+
+[!] Xcode - develop for iOS and macOS (Xcode 26.6) [1 309ms]
+    • Xcode at /Applications/Xcode.app/Contents/Developer
+    • Build 17F113
+    ✗ Unable to get list of installed Simulator runtimes.
+    ! CocoaPods not installed.
+        CocoaPods is a package manager for iOS or macOS platform code.
+        Without CocoaPods, plugins will not work on iOS or macOS.
+        For more info, see https://flutter.dev/to/platform-plugins
+      For installation instructions, see https://guides.cocoapods.org/using/getting-started.html#installation
+
+[✓] Chrome - develop for the web [5ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (2 available) [11,3s]
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 26.5.1 25F80 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 150.0.7871.187
+
+[✓] Network resources [1 179ms]
+    • All expected network resources are available.
+
+! Doctor found issues in 3 categories.

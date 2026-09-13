@@ -1,0 +1,36 @@
+name: zuzu
+description: ЗуЗу — сообщество и забота о питомце
+publish_to: none
+version: 0.1.0+1
+environment:
+  sdk: '>=3.8.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  http: ^1.4.0
+  uuid: ^4.5.1
+  intl: any
+  flutter_secure_storage: ^9.2.4
+  image_picker: ^1.1.2
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  geolocator: ^14.0.2
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
+  flutter_timezone: ^4.1.1
+  url_launcher: ^6.3.2
+  app_links: ^6.4.1
+  firebase_core: ^4.0.0
+  firebase_messaging: ^16.0.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  analyzer: ^14.4.0
+flutter:
+  config:
+    enable-swift-package-manager: false
+  uses-material-design: true
